@@ -14,6 +14,31 @@
     <h1>手机号登录页！</h1>
     <a href="/login/userName">用户名密码登录</a>
     <hr />
+    <form action="/authentication/mobile" method="post">
+    手机号：<input type="text" id="mobile" name="mobile" value="15312345678" /><br><br/>
+    验证码：<input type="text" id="code" name="code"/><br><br/>
+    <p id="message" style="color: red;"></p>
+    <button type="button" onclick="getCode()">获取验证码</button><br/><br/><br/>
+    <input type="submit" class="btn-success" value="登录" />
+    </form>
 </div>
+<script>
+    function getCode() {
+        const mobile = $("#mobile").val();
+        $.ajax({
+            url:"/code/sms",
+            type:"get",
+            data:{
+                "mobile":mobile,
+            },
+            success:function(response){
+                $("#message").html(response.message);
+            },
+            error:function(response) {
+                console.log(response);
+            }
+        })
+    }
+</script>
 </body>
 </html>

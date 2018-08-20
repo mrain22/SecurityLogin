@@ -25,8 +25,8 @@ public class ImageCodeGenerator implements ValidateCodeGenerator {
         BufferedImage image = defaultKaptcha.createImage(code);
         //这里设置的是60s过期,可做成可配置
         ImageCode imageCode = new ImageCode(image,code,60);
-        //保存到session中
-        webRequest.getRequest().getSession().setAttribute("imageCode",imageCode);
+//        //保存到session中
+//        webRequest.getRequest().getSession().setAttribute("imageCode",imageCode);
         return imageCode ;
     }
 }

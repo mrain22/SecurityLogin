@@ -1,7 +1,6 @@
-package cn.mrian22.validate.imagecode;
+package cn.mrian22.validate.common;
 
-import cn.mrian22.validate.common.ValidateCodeException;
-import cn.mrian22.validate.entity.ImageCode;
+import cn.mrian22.validate.entity.Code;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -19,14 +18,23 @@ import java.io.IOException;
  * @author 22
  * 写完该类，需要将此类加到SecurityConfig配置类中。
  */
-public class ImageCodeFilter extends OncePerRequestFilter {
+public class ValidateCodeFilter extends OncePerRequestFilter {
     private AuthenticationFailureHandler failureHandler;
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest,
                                     HttpServletResponse httpServletResponse,
                                     FilterChain filterChain) throws ServletException, IOException {
-        if(StringUtils.equals("/authentication/namepass",httpServletRequest.getRequestURI())
-                && StringUtils.equalsIgnoreCase(httpServletRequest.getMethod(),"post")){
+        //所有要拦截的需要验证码验证的路径，可以设置成可配置的，这里就简单写一下
+        String[] urls = {"/authentication/namepass","/authentication/mobile"};
+        boolean isTrue = false;
+        for (String url : urls){
+            //判断当前路径是不是需要验证码验证的路径
+            if (StringUtils.equals(url,httpServletRequest.getRequestURI())){
+                isTrue = true;
+                break;
+            }
+        }
+        if(isTrue){
             try {
                 validate(new ServletWebRequest(httpServletRequest));
             } catch (ValidateCodeException e) {
@@ -41,23 +49,24 @@ public class ImageCodeFilter extends OncePerRequestFilter {
     }
 
     private void validate(ServletWebRequest webRequest) throws ServletRequestBindingException {
-        //拿到session.保存的时候是以ImageCode的格式保存的
-        ImageCode imageCode = (ImageCode) webRequest.getRequest().getSession().getAttribute("imageCode");
+        //拿到session.保存的时候是以Code的格式保存的
+        //在这里不论是图片验证码还是短息验证码都是Code的子类，这里将保存在session的强转成Code，用里面的是否过期。
+        Code code = (Code) webRequest.getRequest().getSession().getAttribute(MyWebAttributes.MY_CODE_SESSION);
         //获取请求里的验证码，获取前台传过来的验证码
-        String requestCode = ServletRequestUtils.getStringParameter(webRequest.getRequest(), "imageCode");
+        String requestCode = ServletRequestUtils.getStringParameter(webRequest.getRequest(), "code");
         // 清理验证码session
-        webRequest.getRequest().getSession().removeAttribute("imageCode");
+        webRequest.getRequest().getSession().removeAttribute(MyWebAttributes.MY_CODE_SESSION);
 
         if (StringUtils.isBlank(requestCode)){
             throw new ValidateCodeException("验证码不能为空");
         }
-        if (imageCode == null){
+        if (code == null){
             throw new ValidateCodeException("验证码不存在");
         }
-        if (imageCode.isExpried()){
+        if (code.isExpried()){
             throw new ValidateCodeException("验证码已过期！");
         }
-        if (!(StringUtils.equalsIgnoreCase(imageCode.getCode(),requestCode))){
+        if (!(StringUtils.equalsIgnoreCase(code.getCode(),requestCode))){
             throw new ValidateCodeException("验证码错误");
         }
     }

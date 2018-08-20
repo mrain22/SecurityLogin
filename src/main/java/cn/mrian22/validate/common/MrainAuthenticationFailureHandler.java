@@ -14,6 +14,7 @@ import java.io.IOException;
 /**
  * @author 22
  * 自己写的授权失败处理器
+ * 通过@Component注入了，需要在SecurityConfig中添加下
  */
 @Component("mrainAuthenticationFailureHandler")
 public class MrainAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {

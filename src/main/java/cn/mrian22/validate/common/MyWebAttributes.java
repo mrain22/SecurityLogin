@@ -9,4 +9,8 @@ public final class MyWebAttributes {
      *用来作为我自定义的错误信息保存到session中的key值
      */
     public static final String MY_EXCEPTION_SESSION = "MY_EXCEPTION_SESSION";
+    /**
+     *用来作为我验证码保存到session中的key值
+     */
+    public static final String MY_CODE_SESSION = "MY_CODE_SESSION";
 }
