@@ -2,7 +2,9 @@ package cn.mrian22.validate.common;
 
 import cn.mrian22.validate.entity.Code;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -18,8 +20,11 @@ import java.io.IOException;
  * @author 22
  * 写完该类，需要将此类加到SecurityConfig配置类中。
  */
+@Component("validateCodeFilter")
 public class ValidateCodeFilter extends OncePerRequestFilter {
-    private AuthenticationFailureHandler failureHandler;
+
+    @Autowired
+    private AuthenticationFailureHandler mrainAuthenticationFailureHandler;
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest,
                                     HttpServletResponse httpServletResponse,
@@ -38,8 +43,8 @@ public class ValidateCodeFilter extends OncePerRequestFilter {
             try {
                 validate(new ServletWebRequest(httpServletRequest));
             } catch (ValidateCodeException e) {
-                //调用自己定义的登录失败处理器进行处理。这里需要在SecurityConfig里set进来。
-                failureHandler.onAuthenticationFailure(httpServletRequest,httpServletResponse,e);
+                //调用自己定义的登录失败处理器进行处理。
+                mrainAuthenticationFailureHandler.onAuthenticationFailure(httpServletRequest,httpServletResponse,e);
                 //出错返回，不向下执行
                 return;
             }
@@ -69,13 +74,5 @@ public class ValidateCodeFilter extends OncePerRequestFilter {
         if (!(StringUtils.equalsIgnoreCase(code.getCode(),requestCode))){
             throw new ValidateCodeException("验证码错误");
         }
-    }
-
-    public AuthenticationFailureHandler getFailureHandler() {
-        return failureHandler;
-    }
-
-    public void setFailureHandler(AuthenticationFailureHandler failureHandler) {
-        this.failureHandler = failureHandler;
     }
 }

@@ -14,7 +14,7 @@ public class OtherController {
     @PostMapping("/errorPage")
     public String errorPage(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Model model) {
         //session中拿到错误信息
-        model.addAttribute("errMessage",httpServletRequest.getSession().getAttribute(MyWebAttributes.MY_EXCEPTION_SESSION));
+        model.addAttribute("errMessage", httpServletRequest.getSession().getAttribute(MyWebAttributes.MY_EXCEPTION_SESSION));
         return "error";
     }
 }

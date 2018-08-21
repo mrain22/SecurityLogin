@@ -30,17 +30,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private SmsAuthenticationConfig smsAuthenticationConfig;
 
+    /**
+     * 自己写的图片验证码过滤器
+     */
+    @Autowired
+    private ValidateCodeFilter validateCodeFilter;
+
 
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        // 自己写的图片验证码过滤器
-        ValidateCodeFilter validateCodeFilter = new ValidateCodeFilter();
-        //将自己的错误处理set进去。
-        validateCodeFilter.setFailureHandler(mrainAuthenticationFailureHandler);
 
         //将其加在UsernamePasswordAuthenticationFilter之前。
         http.addFilterBefore(validateCodeFilter,UsernamePasswordAuthenticationFilter.class);
+
+        //将自己的短信验证码配置加进来
+        http.apply(smsAuthenticationConfig);
+
         //表单登录
         http.formLogin()
                 .loginPage("/login/userName")
@@ -61,8 +67,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.logout().logoutSuccessUrl("/");
         // 关闭csrf
         http.csrf().disable();
-        //将自己的短信验证码配置加进来
-        http.apply(smsAuthenticationConfig);
     }
 
 //    /**
